@@ -50,7 +50,7 @@ module Endicia
 
   # Request rates.
   def self.get_rates(opts={})
-    @international = opts[:MailClass] == 'International'
+    @international = opts[:MailClass] == 'International' || opts[:InsuredValue].present?
     creds = defaults
     url = "#{label_service_url(opts)}/CalculatePostageRatesXML"
 
@@ -61,7 +61,8 @@ module Endicia
         ci.tag!('AccountID', creds[:AccountID])
         ci.tag!('PassPhrase', creds[:PassPhrase])
       end
-      opts.except(:Test).each { |key, value| xm.tag!(key, value) }
+      xm.Services(opts[:Services]) if opts[:Services]
+      opts.except(:Test, :Services).each { |key, value| xm.tag!(key, value) }
     end
 
     result = self.post(url, :body => body)
